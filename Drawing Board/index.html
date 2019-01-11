@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Drawing Board</title>
+	<link rel="stylesheet" href="style.css">
+	<script src="lib/jquery-3.1.0.js"></script>
+	<script src="lib/vue.min.js"></script>
+	<script src="lib/__at.alicdn.com_t_font_611936_r1ahagupcu4pwrk9.js"></script>
+	<script src="lib/$1.js"></script>
+	<script src="layer/layer.js"></script>
+</head>
+<body>
+<div id="drawing-board-page">
+	<header>
+		<div class="current-tool">
+			<i :class="currentTool"></i>
+			<input type="hidden" name="currentTool" v-model="currentToolNum">
+		</div>
+		<ul class="tool-info clearfix" v-cloak>
+			<li class="lineWidth">
+				<p>线条宽度:</p>
+				<input type="range" id="radius" name="lineWidth" v-model="lineWidth" v-on:input="bindLineWidth($event)" min="1" max="20" class="rangeSlider"/>
+				<span class="ranger">
+                <span id="size" class="size"></span>
+            </span>
+			</li>
+			<li class="color">
+				<p>笔触颜色:</p>
+				<div class="color-box">
+					<div class="color-value"
+						 data-type="1"
+						 :style="{backgroundColor: '#'+pageLineColor}"
+						 @click="clickPopupColorShow($event)"
+						 v-cloak></div>
+				</div>
+			</li>
+		</ul>
+		<div class="localLoader" @click="download()">
+			<svg class="icon" id="save">
+				<use xlink:href="#icon-save-o"></use>
+			</svg>
+		</div>
+		<div class="clearScreen" @click="clearScreen()">
+			<svg class="icon" id="clean">
+			<use xlink:href="#icon-clean-o"></use>
+			</svg>
+		</div>
+	</header>
+	<main class="clearfix">
+		<ul class="tools clearfix">
+			<li v-for="(tool,index) in tools"
+				:data-tool="tool.dataTool"
+				:class="{'active':index==selectedToolIndex}">
+				<i :class="tool.toolClass"
+				   @click="selectTool(tool,index)"
+				>
+				</i>
+			</li>
+			<svg id="icon-download" viewBox="0 0 32 32" @click="loadImage()">
+				<path d="M16 18l8-8h-6v-8h-4v8h-6zM23.273 14.727l-2.242 2.242 8.128 3.031-13.158 4.907-13.158-4.907 8.127-3.031-2.242-2.242-8.727 3.273v8l16 6 16-6v-8z"></path>
+			</svg>
+			<svg class="icon" id="loader" version="1.1" xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" @click="onload()">
+				<path d="M128 320c0 0 29.412-96 192-96v96l192-128-192-128v96c-128 0-192 79.836-192 160zM352 384h-288v-192h62.938c5.047-5.959 10.456-11.667 16.244-17.090 21.982-20.595 48.281-36.326 78.057-46.91h-221.239v320h416v-134.312l-64 42.667v27.645z"></path>
+			</svg>
+		</ul>
+
+
+		<canvas id="drawing-board" width="862" height="500" @mousedown="painting($event)"></canvas>
+
+	</main>
+	<div class="popup-color"
+		 :style="{left:popupColorPosition.x+'px',top:popupColorPosition.y+'px'}"
+		 v-show="popupColorShow"
+		 v-cloak
+	>
+		<div class="title" @mousedown="dragPopupColor($event)">颜色选择器</div>
+		<div class="content">
+			<div class="left">
+				<ul class="alternative-color">
+					<li v-for="color in colors"
+						:style="{backgroundColor: color}"
+						@click="selectColor($event)"
+					>
+					</li>
+				</ul>
+			</div>
+			<div class="divider"></div>
+			<div class="right">
+				<div class="color-show-box clearfix">
+					<div class="color-show">
+						新的
+						<div class="color-contrast">
+							<div class="new-color" :style="{backgroundColor:'#'+newColor}"></div>
+							<div class="current-color" :style="{backgroundColor:'#'+pageColor}"></div>
+						</div>
+						当前
+					</div>
+					<div class="color-show-btns">
+						<a href="javascript:;" class="confirm" @click="colorConfirm()">确定</a>
+						<a href="javascript:;" class="cancel" @click="colorCancel()">取消</a>
+					</div>
+				</div>
+				<div class="color-setting clearfix">
+					<div class="rgb-color clearfix">
+						<ul>
+							<li class="clearfix">
+								<p>R:</p>
+								<input type="text" name="R-color" maxlength="3" v-model="RColor"
+									   v-on:input="bindRColor($event)">
+							</li>
+							<li class="clearfix">
+								<p>G:</p>
+								<input type="text" name="G-color" maxlength="3" v-model="GColor"
+									   v-on:input="bindGColor($event)">
+							</li>
+							<li class="clearfix">
+								<p>B:</p>
+								<input type="text" name="B-color" maxlength="3" v-model="BColor"
+									   v-on:input="bindBColor($event)">
+							</li>
+						</ul>
+					</div>
+					<div class="hex-color clearfix">
+						<p>16进制值：</p>
+						<div class="hex-color-setting">
+							<p>#</p>
+							<input type="text"
+								   name="hex-color"
+								   v-model="newColor"
+								   maxlength="6"
+								   v-on:input="bindHex($event)"
+							></div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<script src="main.js"></script>
+</body>
+</html>
